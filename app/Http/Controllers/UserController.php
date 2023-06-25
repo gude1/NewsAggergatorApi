@@ -10,7 +10,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use OpenApi\Annotations as OA;
 
+/**
+ * @OA\SecurityScheme(
+ *     securityScheme="bearerAuth",
+ *     type="http",
+ *     scheme="bearer",
+ *     bearerFormat="JWT",
+ * )
+ */
 class UserController extends Controller
 {
     /**
@@ -20,9 +29,40 @@ class UserController extends Controller
     {
         $this->middleware(['auth:sanctum'])->except(["store", "login"]);
     }
-
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *     path="/api/auth/signup",
+     *     summary="Create a new user",
+     *     tags={"Users"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/StoreUserRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Signup Success!"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="token", type="string", example="your_token_here")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Could not process your request at the moment, please try again")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Signup request failed, could not process your request at the moment, please try again")
+     *         )
+     *     )
+     * )
      */
     public function store(StoreUserRequest $request)
     {
@@ -55,13 +95,32 @@ class UserController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/user",
+     *     summary="Get the current user",
+     *     tags={"Users"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="user", ref="#/components/schemas/User")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Request failed, could not process your request at the moment, please try again")
+     *         )
+     *     )
+     * )
      */
     public function show(Request $request)
     {
         try {
             return response()->json([
-                "user" => $request->user()->refresh(),
+                "user" => $request->user(),
             ], 200);
         } catch (\Throwable $th) {
             Log::error("UserController.show: {$th->getMessage()}");
@@ -72,7 +131,39 @@ class UserController extends Controller
     }
 
     /**
-     * Log current user session out
+     * @OA\Post(
+     *     path="/api/auth/login",
+     *     summary="User login",
+     *     tags={"Users"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/LoginUserRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Login Success!"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="token", type="string", example="your_token_here")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="User not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Failed to login, please try again")
+     *         )
+     *     )
+     * )
      */
     public function login(LoginUserRequest $request)
     {
@@ -102,27 +193,47 @@ class UserController extends Controller
         } catch (\Throwable $th) {
             Log::error("UserController.login: {$th->getMessage()}");
             return response()->json([
-                "error" => 'Failed to in please try again'
+                "error" => 'Failed to login, please try again'
             ], 500);
         }
     }
 
 
     /**
-     * Log current user session out
+     * @OA\Post(
+     *     path="/api/auth/logout",
+     *     summary="User logout",
+     *     tags={"Users"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Logout successful")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Failed to logout, please try again")
+     *         )
+     *     )
+     * )
      */
     public function logout(Request $request)
     {
         try {
             $request->user()->currentAccessToken()->delete();
             return response()->json([
-                "message" => "Log out successful"
+                "message" => "Logout successful"
             ], 200);
         } catch (\Throwable $th) {
             Log::error("UserController.logout: {$th->getMessage()}");
             return response()->json([
-                "error" => 'Failed to logout please try again'
+                "error" => 'Failed to logout, please try again'
             ], 500);
         }
     }
+
 }

@@ -8,8 +8,18 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use OpenApi\Annotations as OA;
 
 
+/**
+ * @OA\Schema(
+ *     title="User",
+ *     description="User model",
+ *     @OA\Xml(
+ *         name="User"
+ *     )
+ * )
+ */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -48,6 +58,13 @@ class User extends Authenticatable
 
     /**
      * Get the preference associated with the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @OA\Relation(
+     *     name="preference",
+     *     type="object",
+     *     schema=@OA\Schema(ref="#/components/schemas/UserPreference")
+     * )
      */
     public function preference(): HasOne
     {
