@@ -20,10 +20,53 @@ class NewsController extends Controller
      */
     public function index()
     {
-        $keyword = request("keyword");
-        $date = request("date");
-        $category = request('category');
-        $page = request("page") ? request("page") : 1;
+        try {
+            $preference = request()->user()->preference;
+            $categories = $preference->categories ? json_decode($preference->categories) : [];
+            $authors = $preference->authors ? json_decode($preference->authors) : [];
+            $sources = $preference->sources ? json_decode($preference->sources) : [];
+            $page = request("page") ? request("page") : 1;
+            $newsapi_params = $guardian_params = $newyork_params = [
+                "page" => $page,
+            ];
+            $newsapi_res = $newyorktimes_res = $guardian_news_res = [];
+
+            if (count($categories) > 0) {
+                $newsapi_params["category"] = $categories[0];
+                $guardian_params["section"] = $categories[0];
+                $newyork_params["fq"] = "section_name:{$categories[0]}";
+            }
+            if ($authors) {
+                $newyork_params["fq"] .= " OR byline:'{$authors[0]}'";
+            }
+
+            if (count($sources) < 1) {
+                $newsapi_res = $this->getNewsApi($newsapi_params);
+                $newyorktimes_res = $this->getNewYorkTimesNews($newyork_params);
+                $guardian_news_res = $this->getGuardianNews($guardian_params);
+            } else {
+                for ($i = 0; $i < count($sources); $i++) {
+                    if ($sources[$i] == "newsapi") {
+                        $newsapi_res = $this->getNewsApi($newsapi_params);
+                    } elseif ($sources[$i] == 'guardian') {
+                        $guardian_news_res = $this->getGuardianNews($guardian_params);
+                    } elseif ($sources[$i] == "newyorktimes") {
+                        $newyorktimes_res = $this->getNewYorkTimesNews($newyork_params);
+                    }
+                }
+            }
+
+            return response()->json([
+                "page" => $page,
+                "data" => array_merge($newsapi_res, $newyorktimes_res, $guardian_news_res)
+            ]);
+
+        } catch (\Throwable $th) {
+            Log::error("NewsController.index: {$th->getMessage()}");
+            return response()->json([
+                "error" => "Request failed could not process your request at the moment please try again"
+            ], 500);
+        }
     }
 
     /**
@@ -76,9 +119,24 @@ class NewsController extends Controller
             if ($page) {
                 $params["page"] = $page;
             }
+            return $this->getGuardianNews($params);
+        } catch (\Throwable $th) {
+            Log::error("NewsController.searchGuardianNews: {$th->getMessage()}");
+            return [];
 
+        }
+    }
+
+    /**
+     * Function to return guardian news
+     */
+    public function getGuardianNews($params = [])
+    {
+        try {
             $req = Http::get(env("GUARDIAN_NEWS_SEARCH_URL"), array_merge($params, [
                 "api-key" => env("GUARDIAN_NEWS_API_kEY"),
+                "show-tags" => "contributor",
+                "show-element" => "image",
             ]));
             if ($req->status() == 200) {
                 $data = json_decode($req);
@@ -87,9 +145,9 @@ class NewsController extends Controller
                 for ($i = 0; $i < count($articles); $i++) {
                     array_push($result_arr, [
                         "title" => $articles[$i]->webTitle,
-                        "source" => "guardian news",
-                        "category" => $articles[$i]->category,
-                        "author" => null,
+                        "source" => "Guardian News",
+                        "category" => $articles[$i]->sectionName,
+                        // "author" => count($articles[$i]->tags) ? $articles[$i]->tags[0]->webTitle : null,
                         "desc" => null,
                         "url" => $articles[$i]->webUrl,
                         "image" => null,
@@ -100,9 +158,8 @@ class NewsController extends Controller
             }
             return [];
         } catch (\Throwable $th) {
-            Log::error("NewsController.searchGuardianNews: {$th->getMessage()}");
+            Log::error("NewsController.getGuardianNews: {$th->getMessage()}");
             return [];
-
         }
     }
 
@@ -130,6 +187,19 @@ class NewsController extends Controller
                 $params["page"] = $page;
             }
 
+            return $this->getNewsApi();
+        } catch (\Throwable $th) {
+            Log::error("NewsController.searchNewsApiOrg: {$th->getMessage()}");
+            return [];
+        }
+    }
+
+    /**
+     * Function to return guardian news
+     */
+    public function getNewsApi($params = [])
+    {
+        try {
             $req = Http::get(env("NEWSAPIORG_SEARCH_URL"), array_merge($params, [
                 "apiKey" => env("NEWSAPIORG_API_KEY"),
             ]));
@@ -141,9 +211,9 @@ class NewsController extends Controller
                 for ($i = 0; $i < count($articles); $i++) {
                     array_push($result_arr, [
                         "title" => $articles[$i]->title,
-                        "source" => "newsapiorg",
+                        "source" => "News Api Org",
                         "category" => null,
-                        "author" => $articles[$i]->author,
+                        // "author" => $articles[$i]->author,
                         "desc" => $articles[$i]->description,
                         "url" => $articles[$i]->url,
                         "image" => $articles[$i]->urlToImage,
@@ -154,7 +224,7 @@ class NewsController extends Controller
             }
             return [];
         } catch (\Throwable $th) {
-            Log::error("NewsController.searchNewsApiOrg: {$th->getMessage()}");
+            Log::error("NewsController.getNewsApi: {$th->getMessage()}");
             return [];
         }
     }
@@ -180,6 +250,16 @@ class NewsController extends Controller
                 $params["page"] = $page;
             }
 
+            return $this->getNewYorkTimesNews($params);
+        } catch (\Throwable $th) {
+            Log::error("NewsController.searchNewYorkTimesNews: {$th->getMessage()}");
+            return [];
+        }
+    }
+
+    public function getNewYorkTimesNews($params)
+    {
+        try {
             $req = Http::get(env("NEWYORKTIMES_SEARCH_URL"), array_merge($params, [
                 "api-key" => env("NEWYORKTIMES_API_KEY"),
             ]));
@@ -193,7 +273,7 @@ class NewsController extends Controller
                         "title" => $articles[$i]->headline->main,
                         "source" => $articles[$i]->source,
                         "category" => $articles[$i]->news_desk,
-                        "author" => null,
+                        "author" => count($articles[$i]->byline->person) > 0 ? "{$articles[$i]->byline->person[0]->firstname} {$articles[$i]->byline->person[0]->lastname}" : null,
                         "desc" => $articles[$i]->snippet,
                         "url" => $articles[$i]->web_url,
                         "image" => null,
@@ -204,10 +284,13 @@ class NewsController extends Controller
             }
             return [];
         } catch (\Throwable $th) {
-            Log::error("NewsController.searchNewsApiOrg: {$th->getMessage()}");
+            Log::error("NewsController.searchNewYorkTimesNews: {$th->getMessage()}");
             return [];
         }
     }
+
+
+
 
     /**
      * Store a newly created resource in storage.

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserPreferenceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -32,4 +33,10 @@ Route::prefix('user')->group(function () {
 
 Route::prefix('news')->group(function () {
     Route::post("/search", [NewsController::class, "search"]);
+    Route::post("/", [NewsController::class, "index"]);
+});
+
+Route::prefix('preference')->group(function () {
+    Route::post("/", [UserPreferenceController::class, "store"]);
+    Route::get("/", [UserPreferenceController::class, "show"]);
 });
