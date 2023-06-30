@@ -33,7 +33,7 @@ Route::prefix('user')->group(function () {
 
 Route::prefix('news')->group(function () {
     Route::post("/search", [NewsController::class, "search"]);
-    Route::post("/", [NewsController::class, "index"]);
+    Route::get("/", [NewsController::class, "index"]);
 });
 
 Route::prefix('preference')->group(function () {

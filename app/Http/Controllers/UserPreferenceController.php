@@ -7,7 +7,6 @@ use App\Models\UserPreference;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-
 class UserPreferenceController extends Controller
 {
     /** Instantiate a new controller instance.
@@ -18,8 +17,42 @@ class UserPreferenceController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *     path="/api/preference",
+     *     tags={"User Preferences"},
+     *     summary="Store user's  preference",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/StoreUserPreferenceRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Preference updated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Preference updated"),
+     *             @OA\Property(property="preference", ref="#/components/schemas/UserPreference")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Request is empty",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Request is empty")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Could not process the request",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Could not process your request at the moment, please try again")
+     *         )
+     *     ),
+     *     security={
+     *         {"bearerAuth": {}}
+     *     }
+     * )
      */
+
     public function store(StoreUserPreferenceRequest $req)
     {
         try {
@@ -73,7 +106,28 @@ class UserPreferenceController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/preference",
+     *     tags={"User Preferences"},
+     *     summary="Display specified user's preference",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="preference", ref="#/components/schemas/UserPreference")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Could not process the request",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Request failed, could not process your request at the moment, please try again")
+     *         )
+     *     ),
+     *     security={
+     *         {"bearerAuth": {}}
+     *     }
+     * )
      */
     public function show(Request $request)
     {

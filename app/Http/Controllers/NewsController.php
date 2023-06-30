@@ -16,15 +16,93 @@ class NewsController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *     path="/api/news",
+     *     operationId="getNews",
+     *     tags={"News"},
+     *     summary="Get a listing of news articles",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="page",
+     *                 type="integer",
+     *                 example=1
+     *             ),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(
+     *                         property="title",
+     *                         type="string",
+     *                         example="Article title"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="source",
+     *                         type="string",
+     *                         example="News source"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="category",
+     *                         type="string",
+     *                         example="Article category"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="desc",
+     *                         type="string",
+     *                         example="Article description"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="url",
+     *                         type="string",
+     *                         example="https://example.com/article"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="image",
+     *                         type="string",
+     *                         example="https://example.com/article/image.jpg"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="date",
+     *                         type="string",
+     *                         example="2023-06-27"
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal server error",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="error",
+     *                 type="string",
+     *                 example="Request failed, could not process your request at the moment. Please try again."
+     *             )
+     *         )
+     *     )
+     * )
      */
     public function index()
     {
         try {
             $preference = request()->user()->preference;
-            $categories = $preference->categories ? json_decode($preference->categories) : [];
-            $authors = $preference->authors ? json_decode($preference->authors) : [];
-            $sources = $preference->sources ? json_decode($preference->sources) : [];
+            $categories = $authors = $sources = [];
+            if (!is_null($preference)) {
+                $categories = $preference->categories ? json_decode($preference->categories) : [];
+                $authors = $preference->authors ? json_decode($preference->authors) : [];
+                $sources = $preference->sources ? json_decode($preference->sources) : [];
+            }
             $page = request("page") ? request("page") : 1;
             $newsapi_params = $guardian_params = $newyork_params = [
                 "page" => $page,
@@ -70,7 +148,101 @@ class NewsController extends Controller
     }
 
     /**
-     * Search Through a List
+     * @OA\Get(
+     *     path="/news/search",
+     *     operationId="searchNews",
+     *     tags={"News"},
+     *     summary="Search for news articles",
+     *     @OA\Parameter(
+     *         name="keyword",
+     *         in="query",
+     *         description="Keyword to search",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="source",
+     *         in="query",
+     *         description="Source to search",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="date",
+     *         in="query",
+     *         description="Date to filter by",
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="category",
+     *         in="query",
+     *         description="Category to filter by",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(
+     *                         property="title",
+     *                         type="string",
+     *                         example="Article title"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="source",
+     *                         type="string",
+     *                         example="News source"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="category",
+     *                         type="string",
+     *                         example="Article category"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="desc",
+     *                         type="string",
+     *                         example="Article description"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="url",
+     *                         type="string",
+     *                         example="https://example.com/article"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="image",
+     *                         type="string",
+     *                         example="https://example.com/article/image.jpg"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="date",
+     *                         type="string",
+     *                         example="2023-06-27"
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal server error",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="error",
+     *                 type="string",
+     *                 example="Request failed, could not process your request at the moment. Please try again."
+     *             )
+     *         )
+     *     )
+     * )
      */
     public function search(Request $request)
     {
