@@ -27,6 +27,7 @@ Project is built with Laravel version 10
 <li>Create .env file in the root directory of the project, copy the content of .env.example into your .env file</li>
 
 <li>Update this section in your .env with your api keys</li>
+
 ```bash
 GUARDIAN_NEWS_API_kEY=
 NEWYORKTIMES_API_KEY=
