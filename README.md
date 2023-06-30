@@ -50,4 +50,4 @@ Php Laravel
 
 ## Documentation
 
-<li>Visit swagger doc on http://{LOCAL_HOST_ADDRESS}/api/documentation#/Users</li>
+<li>Visit swagger doc on http://{LARAVEL_SERVER_ADDR}/api/documentation#/Users</li>
