@@ -20,9 +20,9 @@ Project is built with Laravel version 10
 
 <li>Ensure that php version >= 8.1 is installed</li>
 <li>Install and setup composer</li>
-<li>Get api key for newsapi from -[NewsApiOrg: ](https://newsapi.org/)</li>
-<li>Get api key for Guardians news from -[Guardian News: ](https://open-platform.theguardian.com/documentation/)</li>
-<li>Get api key for new york times from -[NewYorkTimes: ](https://developer.nytimes.com/apis/)</li>
+<li>Get api key for newsapi from -[NewsApiOrg:](https://newsapi.org/)</li>
+<li>Get api key for Guardians news from -[Guardian News:](https://open-platform.theguardian.com/documentation/)</li>
+<li>Get api key for new york times from -[NewYorkTimes:](https://developer.nytimes.com/apis/)</li>
 
 <li>Create .env file in the root directory of the project, copy the content of .env.example into your .env file</li>
 
@@ -47,3 +47,7 @@ php artisan serve
 
 ## Tech Stack
 Php Laravel
+
+## Documentation
+
+<li>Visit swagger doc on http://{LOCAL_HOST_ADDRESS}/api/documentation#/Users</li>
