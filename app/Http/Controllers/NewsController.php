@@ -57,6 +57,11 @@ class NewsController extends Controller
      *                         example="Article category"
      *                     ),
      *                     @OA\Property(
+     *                         property="author",
+     *                         type="string",
+     *                         example="Article Author"
+     *                     ),
+     *                     @OA\Property(
      *                         property="desc",
      *                         type="string",
      *                         example="Article description"
@@ -247,6 +252,11 @@ class NewsController extends Controller
     public function search(Request $request)
     {
         try {
+            if (!request("keyword")) {
+                return response()->json([
+                    "error" => "Missing required parameter 'keyword'"
+                ], 400);
+            }
             $keyword = request("keyword");
             $source = request("source");
             $date = request("date");
@@ -319,7 +329,7 @@ class NewsController extends Controller
                         "title" => $articles[$i]->webTitle,
                         "source" => "Guardian News",
                         "category" => $articles[$i]->sectionName,
-                        // "author" => count($articles[$i]->tags) ? $articles[$i]->tags[0]->webTitle : null,
+                        "author" => null,
                         "desc" => null,
                         "url" => $articles[$i]->webUrl,
                         "image" => null,
@@ -385,7 +395,7 @@ class NewsController extends Controller
                         "title" => $articles[$i]->title,
                         "source" => "News Api Org",
                         "category" => null,
-                        // "author" => $articles[$i]->author,
+                        "author" => $articles[$i]->author || null,
                         "desc" => $articles[$i]->description,
                         "url" => $articles[$i]->url,
                         "image" => $articles[$i]->urlToImage,
@@ -459,40 +469,5 @@ class NewsController extends Controller
             Log::error("NewsController.searchNewYorkTimesNews: {$th->getMessage()}");
             return [];
         }
-    }
-
-
-
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

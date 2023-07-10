@@ -97,30 +97,61 @@ class UserController extends Controller
     /**
      * @OA\Get(
      *     path="/api/user",
-     *     summary="Get the current user",
-     *     tags={"Users"},
-     *     security={{"bearerAuth":{}}},
+     *     operationId="getUser",
+     *     tags={"User"},
+     *     summary="Get user details",
+     *     description="Retrieves the user details along with their preferences.",
      *     @OA\Response(
      *         response=200,
-     *         description="Success",
+     *         description="Successful operation",
      *         @OA\JsonContent(
-     *             @OA\Property(property="user", ref="#/components/schemas/User")
+     *             @OA\Property(property="user", ref="#/components/schemas/UserWithPreference")
      *         )
      *     ),
      *     @OA\Response(
      *         response=500,
-     *         description="Internal Server Error",
+     *         description="Internal server error",
      *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Request failed, could not process your request at the moment, please try again")
+     *             @OA\Property(property="error", type="string", example="Request failed could not process your request at the moment please try again")
      *         )
-     *     )
+     *     ),
+     *     security={
+     *         {"bearerAuth": {}}
+     *     }
      * )
      */
+
+    /**
+     * @OA\Schema(
+     *     schema="UserWithPreference",
+     *     @OA\Property(property="user", ref="#/components/schemas/User"),
+     *     @OA\Property(property="preference", ref="#/components/schemas/Preference")
+     * )
+     */
+
+    /**
+     * @OA\Schema(
+     *     schema="User",
+     *     @OA\Property(property="id", type="integer", example=1),
+     *     @OA\Property(property="name", type="string", example="John Doe"),
+     *     @OA\Property(property="email", type="string", example="john.doe@example.com")
+     * )
+     */
+
+    /**
+     * @OA\Schema(
+     *     schema="Preference",
+     *     @OA\Property(property="id", type="integer", example=1),
+     *     @OA\Property(property="category", type="string", example="Technology"),
+     *     @OA\Property(property="language", type="string", example="English")
+     * )
+     */
+
     public function show(Request $request)
     {
         try {
             return response()->json([
-                "user" => $request->user(),
+                "user" => $request->user()->load("preference"),
             ], 200);
         } catch (\Throwable $th) {
             Log::error("UserController.show: {$th->getMessage()}");
@@ -129,6 +160,7 @@ class UserController extends Controller
             ], 500);
         }
     }
+
 
     /**
      * @OA\Post(

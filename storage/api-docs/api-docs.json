@@ -50,6 +50,10 @@
                                                         "type": "string",
                                                         "example": "Article category"
                                                     },
+                                                    "author": {
+                                                        "type": "string",
+                                                        "example": "Article Author"
+                                                    },
                                                     "desc": {
                                                         "type": "string",
                                                         "example": "Article description"
@@ -296,53 +300,6 @@
                         }
                     }
                 }
-            }
-        },
-        "/api/user": {
-            "get": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Get the current user",
-                "operationId": "9cd1cee912e0176094a7ec83cc9b432f",
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "user": {
-                                            "$ref": "#/components/schemas/User"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Request failed, could not process your request at the moment, please try again"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
             }
         },
         "/api/auth/login": {
@@ -596,6 +553,23 @@
     },
     "components": {
         "schemas": {
+            "Preference": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "category": {
+                        "type": "string",
+                        "example": "Technology"
+                    },
+                    "language": {
+                        "type": "string",
+                        "example": "English"
+                    }
+                },
+                "type": "object"
+            },
             "LoginUserRequest": {
                 "title": "LoginUserRequest",
                 "description": "Login User Request body",

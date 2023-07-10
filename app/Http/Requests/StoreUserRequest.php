@@ -32,7 +32,7 @@ class StoreUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'bail|required|regex:/^[a-zA-Z ]*$/|between:10,50',
+            'name' => 'bail|required|regex:/^[a-zA-Z ]*$/|between:7,50',
             "email" => "bail|required|email|between:10,50|unique:users",
             "password" => "bail|required|min:6"
         ];
