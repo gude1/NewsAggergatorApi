@@ -31,13 +31,6 @@ RUN php artisan key:generate
 # Check if .env file exists, otherwise copy .env.example
 RUN if [ ! -f ".env" ]; then cp .env.example .env; fi
 
-# Create SQLite database
-RUN touch database/database.sqlite && \
-    chown www-data:www-data database/database.sqlite
-
-# Run database migrations
-RUN php artisan migrate --force
-
 # Generate Swagger documentation
 RUN php artisan l5-swagger:generate
 

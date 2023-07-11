@@ -21,7 +21,15 @@
 ```bash
 git clone this repo
 cd into the project
-docker compose up --build
+docker compose up --build 
+```
+<p>Once the Docker container is running, open another terminal or command prompt, navigate to the root directory of the Laravel project, and run the following command :</p>
+
+```bash
+docker-compose exec app touch database/database.sqlite
+docker-compose exec app php artisan migrate
+```
+
 ```
 <p>Laravel app should be available on http://127.0.0.1:8000/</p>
 
