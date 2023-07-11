@@ -16,14 +16,14 @@
 
 ## Configuration and setup
 <h2>Ensure that you have properly setup docker on your local machine</h2>
-<li>Run the following commands</li>
+<li>git clone the repo</li>
+<li>cd into the root directory</li>
+<li>Run the command below:</li>
 
 ```bash
-git clone this repo
-cd into the project
 docker compose up --build 
 ```
-<p>Once the Docker container is running, open another terminal or command prompt, navigate to the root directory of the Laravel project, and run the following command :</p>
+<p>Once the Docker container is running, open another terminal or command prompt, navigate to the root directory of the Laravel project, and run the following commands :</p>
 
 ```bash
 docker-compose exec app touch database/database.sqlite
