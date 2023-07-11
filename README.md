@@ -28,6 +28,7 @@ docker compose up --build
 ```bash
 docker-compose exec app touch database/database.sqlite
 docker-compose exec app php artisan migrate
+docker-compose exec app php artisan serve --host=0.0.0.0 --port=8000
 ```
 
 ```
